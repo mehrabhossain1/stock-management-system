@@ -30,31 +30,33 @@ export default function Home() {
         {/* Display Current Stock */}
         <div className='p-8 w-full bg-white rounded-lg shadow-md'>
           <h1 className='text-2xl font-bold mb-4'>Add Product</h1>
-          <div className='mb-4'>
-            <input
-              type='text'
-              placeholder='Product Name'
-              className='w-full p-2 border rounded'
-            />
-          </div>
-          <div className='mb-4'>
-            <input
-              type='number'
-              placeholder='Quantity'
-              className='w-full p-2 border rounded'
-            />
-          </div>
-          <div className='mb-4'>
-            <input
-              type='number'
-              step='0.01'
-              placeholder='Price'
-              className='w-full p-2 border rounded'
-            />
-          </div>
-          <button className='w-full py-2 bg-teal-600 hover:bg-teal-700 rounded text-white'>
-            Add Product
-          </button>
+          <form>
+            <div className='mb-4'>
+              <input
+                type='text'
+                placeholder='Product Slug'
+                className='w-full p-2 border rounded'
+              />
+            </div>
+            <div className='mb-4'>
+              <input
+                type='number'
+                placeholder='Quantity'
+                className='w-full p-2 border rounded'
+              />
+            </div>
+            <div className='mb-4'>
+              <input
+                type='number'
+                step='0.01'
+                placeholder='Price'
+                className='w-full p-2 border rounded'
+              />
+            </div>
+            <button className='w-full py-2 bg-teal-600 hover:bg-teal-700 rounded text-white'>
+              Add Product
+            </button>
+          </form>
 
           {/* Current Stock */}
           <div className='mt-6'>
