@@ -8,6 +8,16 @@ import { toast } from "react-toastify";
 export default function Home() {
   const [productForm, setProductForm] = useState({});
   const [products, setProducts] = useState([]);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [dropdown, setDropdown] = useState([
+    {
+      _id: "64e63f9b43ff9b5c9544828e",
+      slug: "Jeans",
+      quantity: "12",
+      price: "120",
+    },
+  ]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -50,6 +60,17 @@ export default function Home() {
     setProductForm({ ...productForm, [e.target.name]: e.target.value });
   };
 
+  const onDropdownEdit = async (e) => {
+    setQuery(e.target.value);
+    if (!loading) {
+      setLoading(true);
+      const response = await fetch("/api/search?query=" + query);
+      let rjson = await response.json();
+      setDropdown(rjson.products);
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Header />
@@ -60,6 +81,7 @@ export default function Home() {
           <h1 className='text-2xl font-bold mb-4'>Search Product</h1>
           <div className='flex space-x-4 mb-4'>
             <input
+              onChange={onDropdownEdit}
               type='text'
               placeholder='Enter Product Name'
               className='flex-grow p-2 border rounded'
@@ -74,6 +96,43 @@ export default function Home() {
               Search
             </button>
           </div>
+          {loading && (
+            <svg
+              width={40}
+              height={40}
+              viewBox='0 0 38 38'
+              xmlns='http://www.w3.org/2000/svg'
+              stroke={"#3498db"}
+            >
+              <g fill='none' fillRule='evenodd'>
+                <g transform='translate(1 1)' strokeWidth='2'>
+                  <circle strokeOpacity='.5' cx='18' cy='18' r='18' />
+                  <path d='M36 18c0-9.94-8.06-18-18-18'>
+                    <animateTransform
+                      attributeName='transform'
+                      type='rotate'
+                      from='0 18 18'
+                      to='360 18 18'
+                      dur='1s'
+                      repeatCount='indefinite'
+                    />
+                  </path>
+                </g>
+              </g>
+            </svg>
+          )}
+          {dropdown.map((item) => {
+            return (
+              <div
+                key={item.slug}
+                className='container flex justify-between my-3'
+              >
+                <span className='slug'>{item.slug}</span>
+                <span className='price'>{item.price}</span>
+                <span className='quantity'>{item.quantity}</span>
+              </div>
+            );
+          })}
         </div>
 
         {/* Display Current Stock */}
