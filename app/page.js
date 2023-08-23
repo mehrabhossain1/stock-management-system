@@ -1,10 +1,59 @@
+"use client";
+
 import Header from "@/components/Header";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function Home() {
+  const [productForm, setProductForm] = useState({});
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await fetch("/api/product");
+      let rjson = await response.json();
+      setProducts(rjson.products);
+    };
+    fetchProducts();
+  }, []);
+
+  const addProduct = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("/api/product", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productForm),
+      });
+
+      if (response.ok) {
+        console.log("Product added successfully");
+        toast("Product added successfully!", {
+          position: toast.POSITION.TOP_CENTER,
+        });
+        setProductForm({});
+        // Reset the form or perform other actions as needed
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to add product:", errorData);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleChange = (e) => {
+    setProductForm({ ...productForm, [e.target.name]: e.target.value });
+  };
+
   return (
     <>
       <Header />
+
       <div className='container mx-auto'>
         {/* Search Product */}
         <div className='p-8 w-full bg-white rounded-lg shadow-md'>
@@ -33,6 +82,9 @@ export default function Home() {
           <form>
             <div className='mb-4'>
               <input
+                value={productForm?.slug || ""}
+                name='slug'
+                onChange={handleChange}
                 type='text'
                 placeholder='Product Slug'
                 className='w-full p-2 border rounded'
@@ -40,6 +92,9 @@ export default function Home() {
             </div>
             <div className='mb-4'>
               <input
+                value={productForm?.quantity || ""}
+                name='quantity'
+                onChange={handleChange}
                 type='number'
                 placeholder='Quantity'
                 className='w-full p-2 border rounded'
@@ -47,19 +102,25 @@ export default function Home() {
             </div>
             <div className='mb-4'>
               <input
+                value={productForm?.price || ""}
+                name='price'
+                onChange={handleChange}
                 type='number'
                 step='0.01'
                 placeholder='Price'
                 className='w-full p-2 border rounded'
               />
             </div>
-            <button className='w-full py-2 bg-teal-600 hover:bg-teal-700 rounded text-white'>
+            <button
+              onClick={addProduct}
+              className='w-full py-2 bg-teal-600 hover:bg-teal-700 rounded text-white'
+            >
               Add Product
             </button>
           </form>
 
           {/* Current Stock */}
-          <div className='mt-6'>
+          <div className='my-14'>
             <h1 className='text-2xl font-bold mb-4'>Current Stock</h1>
             <table className='w-full border'>
               <thead>
@@ -71,18 +132,17 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                <tr className='bg-gray-50'>
-                  <td className='p-2'>1</td>
-                  <td className='p-2'>Product A</td>
-                  <td className='p-2'>100</td>
-                  <td className='p-2'>$50.00</td>
-                </tr>
-                <tr>
-                  <td className='p-2'>2</td>
-                  <td className='p-2'>Product B</td>
-                  <td className='p-2'>50</td>
-                  <td className='p-2'>$30.00</td>
-                </tr>
+                {/* mapped the products */}
+                {products.map((product, index) => {
+                  return (
+                    <tr key={product.slug} className='bg-gray-50'>
+                      <td className='p-2'>{index + 1}</td>
+                      <td className='p-2'>{product.slug}</td>
+                      <td className='p-2'>{product.quantity}</td>
+                      <td className='p-2'>${product.price}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
