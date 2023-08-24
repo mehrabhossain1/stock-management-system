@@ -17,6 +17,18 @@ export default function Home() {
       quantity: "12",
       price: "120",
     },
+    {
+      _id: "64e63f9b43ff9b5c9544828e",
+      slug: "Jeans2",
+      quantity: "12",
+      price: "120",
+    },
+    {
+      _id: "64e63f9b43ff9b5c9544828e",
+      slug: "chocolate",
+      quantity: "12",
+      price: "120",
+    },
   ]);
 
   useEffect(() => {
@@ -64,6 +76,7 @@ export default function Home() {
     setQuery(e.target.value);
     if (!loading) {
       setLoading(true);
+      setDropdown([]);
       const response = await fetch("/api/search?query=" + query);
       let rjson = await response.json();
       setDropdown(rjson.products);
@@ -79,7 +92,7 @@ export default function Home() {
         {/* Search Product */}
         <div className='p-8 w-full bg-white rounded-lg shadow-md'>
           <h1 className='text-2xl font-bold mb-4'>Search Product</h1>
-          <div className='flex space-x-4 mb-4'>
+          <div className='flex space-x-4 mb-1'>
             <input
               onChange={onDropdownEdit}
               type='text'
@@ -97,42 +110,33 @@ export default function Home() {
             </button>
           </div>
           {loading && (
-            <svg
-              width={40}
-              height={40}
-              viewBox='0 0 38 38'
-              xmlns='http://www.w3.org/2000/svg'
-              stroke={"#3498db"}
-            >
-              <g fill='none' fillRule='evenodd'>
-                <g transform='translate(1 1)' strokeWidth='2'>
-                  <circle strokeOpacity='.5' cx='18' cy='18' r='18' />
-                  <path d='M36 18c0-9.94-8.06-18-18-18'>
-                    <animateTransform
-                      attributeName='transform'
-                      type='rotate'
-                      from='0 18 18'
-                      to='360 18 18'
-                      dur='1s'
-                      repeatCount='indefinite'
-                    />
-                  </path>
-                </g>
-              </g>
-            </svg>
+            <div class='flex justify-center items-center'>
+              <div class='animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900'></div>
+            </div>
           )}
-          {dropdown.map((item) => {
-            return (
-              <div
-                key={item.slug}
-                className='container flex justify-between my-3'
-              >
-                <span className='slug'>{item.slug}</span>
-                <span className='price'>{item.price}</span>
-                <span className='quantity'>{item.quantity}</span>
-              </div>
-            );
-          })}
+          <div className='dropcontainer absolute w-[70vw] border-1 bg-purple-100 rounded-md'>
+            {dropdown.map((item) => {
+              return (
+                <div
+                  key={item.slug}
+                  className='container flex justify-between p-2 my-1 border-b-2'
+                >
+                  <span className='slug'>
+                    {item.slug} ({item.quantity} available for ${item.price})
+                  </span>
+                  <div className='mx-5'>
+                    <span className='subtract inline-block px-3 cursor-pointer py-1 bg-teal-500 text-white font-semibold rounded-lg shadow-md'>
+                      -
+                    </span>
+                    <span className='quantity mx-3'>{item.quantity}</span>
+                    <span className='add inline-block px-3 cursor-pointer py-1 bg-teal-500 text-white font-semibold rounded-lg shadow-md'>
+                      +
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Display Current Stock */}
