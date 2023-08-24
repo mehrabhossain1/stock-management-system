@@ -11,26 +11,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
-  const [dropdown, setDropdown] = useState([
-    {
-      _id: "64e63f9b43ff9b5c9544828e",
-      slug: "Jeans",
-      quantity: "12",
-      price: "120",
-    },
-    {
-      _id: "64e63f9b43ff9b5c9544828e",
-      slug: "Jeans2",
-      quantity: "12",
-      price: "120",
-    },
-    {
-      _id: "64e63f9b43ff9b5c9544828e",
-      slug: "chocolate",
-      quantity: "12",
-      price: "120",
-    },
-  ]);
+  const [dropdown, setDropdown] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -80,8 +61,6 @@ export default function Home() {
   };
 
   const addProduct = async (e) => {
-    e.preventDefault();
-
     try {
       const response = await fetch("/api/product", {
         method: "POST",
@@ -105,6 +84,12 @@ export default function Home() {
     } catch (error) {
       console.error("Error:", error);
     }
+
+    // Fetch all the products again to sync
+    const response = await fetch("/api/product");
+    let rjson = await response.json();
+    setProducts(rjson.products);
+    e.preventDefault();
   };
 
   const handleChange = (e) => {
@@ -112,14 +97,17 @@ export default function Home() {
   };
 
   const onDropdownEdit = async (e) => {
-    setQuery(e.target.value);
-    if (query.length > 3) {
+    let value = e.target.value;
+    setQuery(value);
+    if (value.length > 3) {
       setLoading(true);
       setDropdown([]);
       const response = await fetch("/api/search?query=" + query);
       let rjson = await response.json();
       setDropdown(rjson.products);
       setLoading(false);
+    } else {
+      setDropdown([]);
     }
   };
 
