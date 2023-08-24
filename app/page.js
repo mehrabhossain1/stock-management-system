@@ -10,6 +10,7 @@ export default function Home() {
   const [products, setProducts] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(false);
   const [dropdown, setDropdown] = useState([
     {
       _id: "64e63f9b43ff9b5c9544828e",
@@ -39,6 +40,44 @@ export default function Home() {
     };
     fetchProducts();
   }, []);
+
+  const buttonAction = async (action, slug, initialQuantity) => {
+    // Immediately change the quantity of the product with the given slug in Product
+    let index = products.findIndex((item) => item.slug == slug);
+    let newProducts = JSON.parse(JSON.stringify(products));
+
+    if (action == "plus") {
+      newProducts[index].quantity = parseInt(initialQuantity) + 1;
+    } else {
+      newProducts[index].quantity = parseInt(initialQuantity) - 1;
+    }
+    setProducts(newProducts);
+
+    // Immediately change the quantity of the product with the given slug in Dropdown
+    let indexDrop = dropdown.findIndex((item) => item.slug == slug);
+    console.log(indexDrop, "parse");
+    let newDropdown = JSON.parse(JSON.stringify(dropdown));
+
+    if (action == "plus") {
+      newDropdown[indexDrop].quantity = parseInt(initialQuantity) + 1;
+    } else {
+      newDropdown[indexDrop].quantity = parseInt(initialQuantity) - 1;
+    }
+    setDropdown(newDropdown);
+
+    console.log(action, slug);
+    setLoadingAction(true);
+    const response = await fetch("/api/action", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ action, slug, initialQuantity }),
+    });
+    let r = await response.json();
+    console.log(r);
+    setLoadingAction(false);
+  };
 
   const addProduct = async (e) => {
     e.preventDefault();
@@ -74,7 +113,7 @@ export default function Home() {
 
   const onDropdownEdit = async (e) => {
     setQuery(e.target.value);
-    if (!loading) {
+    if (query.length > 3) {
       setLoading(true);
       setDropdown([]);
       const response = await fetch("/api/search?query=" + query);
@@ -110,28 +149,42 @@ export default function Home() {
             </button>
           </div>
           {loading && (
-            <div class='flex justify-center items-center'>
-              <div class='animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900'></div>
+            <div className='flex justify-center items-center'>
+              <div className='animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900'></div>
             </div>
           )}
-          <div className='dropcontainer absolute w-[70vw] border-1 bg-purple-100 rounded-md'>
-            {dropdown.map((item) => {
+          <div className='dropcontainer absolute w-[70vw] border-1 bg-teal-100 rounded-md'>
+            {dropdown.map((item, index) => {
               return (
                 <div
-                  key={item.slug}
+                  key={index}
                   className='container flex justify-between p-2 my-1 border-b-2'
                 >
                   <span className='slug'>
                     {item.slug} ({item.quantity} available for ${item.price})
                   </span>
                   <div className='mx-5'>
-                    <span className='subtract inline-block px-3 cursor-pointer py-1 bg-teal-500 text-white font-semibold rounded-lg shadow-md'>
+                    <button
+                      onClick={() => {
+                        buttonAction("minus", item.slug, item.quantity);
+                      }}
+                      disabled={loadingAction}
+                      className='subtract inline-block px-3 cursor-pointer py-1 bg-teal-500 text-white font-semibold rounded-lg shadow-md disabled:bg-teal-200'
+                    >
                       -
+                    </button>
+                    <span className='quantity inline-block w-3 mx-3'>
+                      {item.quantity}
                     </span>
-                    <span className='quantity mx-3'>{item.quantity}</span>
-                    <span className='add inline-block px-3 cursor-pointer py-1 bg-teal-500 text-white font-semibold rounded-lg shadow-md'>
+                    <button
+                      onClick={() => {
+                        buttonAction("plus", item.slug, item.quantity);
+                      }}
+                      disabled={loadingAction}
+                      className='add inline-block px-3 cursor-pointer py-1 bg-teal-500 text-white font-semibold rounded-lg shadow-md disabled:bg-teal-200'
+                    >
                       +
-                    </span>
+                    </button>
                   </div>
                 </div>
               );
